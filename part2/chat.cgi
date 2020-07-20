@@ -4,9 +4,13 @@
 import os
 import sys
 
+# if no chatlog file, create one
+# if POST request, replace the chatlog file with the incoming one
+# else if GET request, read the chatlog file and print it back as is
+# else something else, 400 Bad request
 
 chatlogFile = "part2chatlog.json"
-#/Users/tommyvct/GitHub/COMP3010A2/
+
 if not os.path.exists(chatlogFile):
     with open(chatlogFile, "w") as newChatlog:
         newChatlog.write('{"chatHistoryArray":[]}')

@@ -32,14 +32,13 @@
 
                 // parse the previous string into json, then push to the array
                 chatHistory.chatHistoryArray.push(JSON.parse(toSend));
-                // send everything back
+                // turn it back to string, then send everything back
                 xhr.send(JSON.stringify(chatHistory));
             }
 
             /*
              * json would look like this:
              * {
-             *    (...other properties...),
              *    "chatHistoryArray" : 
              *    [
              *        {"name":"Tommy","message":"hello world!"},
