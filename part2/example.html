@@ -1,0 +1,62 @@
+<html>
+    <head>
+      <script>
+        function doTheThing(){
+          // this is a closure, gets variables
+          // from method it is in
+          function loadedEventCallback () {
+            alert(oReq.responseText);
+          }
+  
+          function loadedEventCallback2 () {
+            var theData = JSON.parse(oReq.responseText);
+            
+            var theDiv = document.getElementById("fillHere");
+            theDiv.innerText = theDiv.innerText + "\n" + theData.REMOTE_ADDR + " with id " + theData.UNIQUE_ID;
+  
+          }
+  
+          // basis from 
+          // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest
+          // probably will not work from localhost!
+          var oReq = new XMLHttpRequest();
+          oReq.addEventListener("load", loadedEventCallback2);
+          // We want to get the IP address, but I don't want to talk too much about CORS!
+          oReq.open("GET", "/~robg/cgi-bin/3010/get_ip.cgi");
+          oReq.setRequestHeader("Accept","application/json");
+          oReq.send();
+        }
+        
+        function setup(){
+          // A function pointer/callback
+          setInterval(doTheThing, 1000);
+  
+          // example of loading innerhtml, too!
+          var aList = ['Leonardo', 'Donatello', 'Michalangelo', 'Raphael'];
+          var html = "";
+          for (var i = 0; i < aList.length; i++){
+            html += "<tr><td>" + aList[i] + "</tr></td>";
+          }
+          var table = document.getElementById("theTable");
+          table.innerHTML = html;
+        }
+
+        function buttonOnClick() {
+          var x = document.getElementById("newMessage").value;
+          alert(x);
+          // clear it
+          document.getElementById("newMessage").value = "";
+        }
+      </script>
+    </head>
+    <body onload='setup()'>
+      <p>Be sure you are on http://www-test.cs.umanitoba.ca/~robg/3010/examples/web/a2_interval.html.</p>
+      <div id='fillHere'>Stuff will go here.</div>
+      <p>Some text box help, too:</p>
+      <input type="text" id="newMessage" value="Default value">
+      <button onclick="buttonOnClick()">Do it</button>
+      <table id="theTable">
+  
+      </table>
+    </body>
+  </html>

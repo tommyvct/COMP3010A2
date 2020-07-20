@@ -1,0 +1,78 @@
+<html>
+    <head>
+        <script>
+            var chatHistory; // type : json
+
+            function pollChatHistory() 
+            {
+                var req = new XMLHttpRequest();
+                req.open("GET", "/~wus2/cgi-bin/chat.cgi");
+                req.setRequestHeader("Accept","application/json");
+                req.addEventListener("load", () =>
+                {
+                    // parse the string to json
+                    chatHistory = JSON.parse(req.responseText);
+                    displayChatHistory(chatHistory.chatHistoryArray);
+                });
+                req.send();
+            }
+
+            function summitOnClick()
+            {
+                // prepart to send
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "/~wus2/cgi-bin/chat.cgi");
+                xhr.setRequestHeader("Content-Type", "application/json");
+                
+                // build the json string
+                var toSend = '{"name":"';
+                toSend += document.getElementById("name").value + '", ';
+                toSend += '"message":"';
+                toSend += document.getElementById("message").value + '"}';
+
+                // parse the previous string into json, then push to the array
+                chatHistory.chatHistoryArray.push(JSON.parse(toSend));
+                // send everything back
+                xhr.send(JSON.stringify(chatHistory));
+            }
+
+            /*
+             * json would look like this:
+             * {
+             *    (...other properties...),
+             *    "chatHistoryArray" : 
+             *    [
+             *        {"name":"Tommy","message":"hello world!"},
+             *        {"name":"Comrade","message":"for the union! ULA!"}
+             *    ]
+             * }
+             */
+
+            function displayChatHistory(chatHistoryArray)
+            {
+                var ret = "";
+
+                chatHistoryArray.forEach(element => 
+                {
+                    ret += element.name + ": " + element.message + "<br>";
+                    // TODO add delete button
+                    // use https://html.spec.whatwg.org/#embedding-custom-non-visible-data-with-the-data-*-attributes
+                });
+
+                document.getElementById("chatlog").innerHTML = ret;
+            }
+
+            function setup()
+            {
+                setInterval(pollChatHistory, 100);
+            }
+        </script>
+    </head>
+
+    <body onload="setup()">
+        name: <input type="text" id="name"><br>
+        message: <input type="text" id="message"><br>
+        <button onclick="summitOnClick()">Submit</button>
+        <div id="chatlog"></div>
+    </body>
+</html>
