@@ -10,14 +10,22 @@
                 req.setRequestHeader("Accept","application/json");
                 req.addEventListener("load", () =>
                 {
-                    // parse the string to json
-                    chatHistory = JSON.parse(req.responseText);
-                    displayChatHistory(chatHistory.chatHistoryArray);
+                    if (req.status == 304) // Not Modified 
+                    {
+                        return;
+                    }
+                    else
+                    {
+                        // parse the string to json
+                        chatHistory = JSON.parse(req.responseText);
+                        displayChatHistory(chatHistory.chatHistoryArray);
+                        document.cookie = "lastModified=" + Math.round(new Date().getTime()/1000);
+                    }
                 });
                 req.send();
             }
 
-            function summitOnClick()
+            function submitOnClick()
             {
                 // prepart to send
                 var xhr = new XMLHttpRequest();
@@ -32,17 +40,20 @@
 
                 // parse the previous string into json, then push to the array
                 chatHistory.chatHistoryArray.push(JSON.parse(toSend));
+                chatHistory.lastModified = Math.round(new Date().getTime()/1000);
                 // turn it back to string, then send everything back
                 xhr.send(JSON.stringify(chatHistory));
+                pollChatHistory();
             }
 
             /*
              * json would look like this:
              * {
+                  "lastModified" : "Thu, 01 Jan 1970 00:00:00 GMT",
              *    "chatHistoryArray" : 
              *    [
              *        {"name":"Tommy","message":"hello world!"},
-             *        {"name":"Comrade","message":"for the union! ULA!"}
+             *        {"name":"Comrade","message":"For the union!"}
              *    ]
              * }
              */
@@ -50,9 +61,14 @@
             function displayChatHistory(chatHistoryArray)
             {
                 var ret = "";
+                var i = 0;
 
                 chatHistoryArray.forEach(element => 
                 {
+                    ret += '<button onclick="deleteChatEntry(this.id)" id="'
+                    ret += i++;
+                    ret += '">Delete</button> ';
+
                     ret += element.name + ": " + element.message + "<br>";
                     // TODO add delete button
                     // use https://html.spec.whatwg.org/#embedding-custom-non-visible-data-with-the-data-*-attributes
@@ -61,8 +77,23 @@
                 document.getElementById("chatlog").innerHTML = ret;
             }
 
+            function deleteChatEntry(id)
+            {
+                // deep copy
+                temp = JSON.parse(JSON.stringify(chatHistory));
+                temp.chatHistoryArray.splice(id, 1);
+                temp.lastModified = Math.round(new Date().getTime()/1000);
+
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "/~wus2/cgi-bin/chat.cgi");
+                xhr.setRequestHeader("Content-Type", "application/json");
+                xhr.send(JSON.stringify(temp));
+                pollChatHistory();
+            }
+
             function setup()
             {
+                document.cookie = "lastModified=" + 0;//Math.round(new Date().getTime()/1000);
                 setInterval(pollChatHistory, 100);
             }
         </script>
@@ -71,7 +102,7 @@
     <body onload="setup()">
         name: <input type="text" id="name"><br>
         message: <input type="text" id="message"><br>
-        <button onclick="summitOnClick()">Submit</button>
+        <button onclick="submitOnClick()">Submit</button>
         <div id="chatlog"></div>
     </body>
 </html>
