@@ -43,6 +43,7 @@
                 chatHistory.lastModified = Math.round(new Date().getTime()/1000);
                 // turn it back to string, then send everything back
                 xhr.send(JSON.stringify(chatHistory));
+                document.getElementById("message").value = "";
                 pollChatHistory();
             }
 
