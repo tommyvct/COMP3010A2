@@ -6,17 +6,20 @@ import os
 
 
 try:
-    name = str.encode(sys.argv[1])
-    response =  "1" if sys.argv[2] == "yes" else "2" #argv[2] == "yes" ? "1" : "0"
+    name = sys.argv[1]
+    if sys.argv[2].lower() == "yes" or sys.argv[2].lower() == "no":
+        response =  "1" if sys.argv[2] == "yes" else "0" #argv[2] == "yes" ? "1" : "0"
+    else:
+        print(f"Bad format\nExample usage:\n{str(os.path.basename(__file__))}  Rick yes\n{str(os.path.basename(__file__))}  Morty no")
+        exit(1)
 except IndexError:
     print(f"Bad format\nExample usage:\n{str(os.path.basename(__file__))}  Rick yes\n{str(os.path.basename(__file__))}  Morty no")
-finally:
     exit(1)
 
 
 
-name = "idsjuafabfbadf"
-response = "1"
+# name = "gdfsg"
+# response = "1"
 
 # create an INET, STREAMing socket
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -32,23 +35,12 @@ req += b"Content-Type: application/x-www-form-urlencoded\r\n\r\n"
 
 req += str.encode(f"name={name}&accept={response}")
 
-print(req.decode())
-print()
-print()
-print()
+# print(req.decode())
+# print()
+# print()
+# print()
 
-
-
-################################################################################
-# POST /~wus2/cgi-bin/a.cgi HTTP/1.1
-# Host: www-test.cs.umanitoba.ca
-# Content-Length: 28
-# Content-Type: application/x-www-form-urlencoded
-#
-# name=idsjuafabfbadf&accept=1
-################################################################################
-
-
+# Example POST request coming out from Chrome
 ################################################################################
 # POST /~wus2/cgi-bin/a.cgi HTTP/1.1\r\n
 # Host: www-test.cs.umanitoba.ca
@@ -69,6 +61,117 @@ print()
 # name=fdsaf&accept=1
 ################################################################################
 
+# Debloated POST request to send
+################################################################################
+# POST /~wus2/cgi-bin/a.cgi HTTP/1.1
+# Host: www-test.cs.umanitoba.ca
+# Content-Length: 28
+# Content-Type: application/x-www-form-urlencoded
+#
+# name=idsjuafabfbadf&accept=1
+################################################################################
+"""
+/// @brief A test fuction to check if the server returned the thing we want.
+///        It compares the result to check line by line, against a semi-hardcoded string.
+/// @param toCheck string to check
+/// @return `True` if check passed, `False` if failed.
+///         If `-O` is not passed to interpreter(i.e. assersion is on), and a check failed, the function will `assert False` instead.
+"""
+def check(toCheck):
+    # assert False is used intentionally to save typing.
+    # the failing condition is already describe in the if condition
+    if toCheck.find("chunked") == -1 and toCheck.find("Content-Length") != -1:
+        print("not chunked, test not covered")
+        assert False
+        return False
+
+    # Build reference string
+    REFERENCE = []
+    REFERENCE.append("HTTP/1.1 200 OK")
+    # skip Date
+    # skip Server
+    REFERENCE.append("Set-Cookie: name=" + name)
+    REFERENCE.append("Set-Cookie: accept=" + response)
+    # skip transfer encoding
+    REFERENCE.append("Content-Type: text/html; charset=UTF-8")
+    # skip 3 lines
+    REFERENCE.append("""    <html>""")
+    REFERENCE.append("""    <body>""")
+    REFERENCE.append("""    <h1>You are Invited!</h1> """)
+    REFERENCE.append("""    details goes here""")
+    REFERENCE.append("""    <br/><br/><br/>""")
+    REFERENCE.append("""    <form action="/~wus2/cgi-bin/a.cgi" method="POST">""")
+    REFERENCE.append("""        <label for="name">Your name:</label>""")
+    REFERENCE.append( f"        <input type=\"text\" name=\"name\" pattern=\".*[a-zA-Z].*\" title=\"At least 1 English letter\" value={name} autofocus required>")
+    REFERENCE.append("""        <br/>""")
+    REFERENCE.append("""        <p2>Would you accept the invitation?</p2>""")
+    REFERENCE.append("""        <br/>""")
+    if response == "0":
+        REFERENCE.append("""        <input type="radio" name="accept" value="1" required > Accept""")
+        REFERENCE.append("""        <input type="radio" name="accept" value="0" checked> Decline""")
+    else:
+        REFERENCE.append("""        <input type="radio" name="accept" value="1" required checked> Accept""")
+        REFERENCE.append("""        <input type="radio" name="accept" value="0" > Decline""")
+    REFERENCE.append("""        <br/>""")
+    REFERENCE.append("""        <input type="submit" value="Submit">""")
+    REFERENCE.append("""    </form>""")
+    REFERENCE.append("""    <br/>""")
+    REFERENCE.append("""        <form action="/~wus2/cgi-bin/a.cgi" method="GET">""")
+    REFERENCE.append("""        <button name="Anonymize" type="submit">Anonymize</button>""")
+    REFERENCE.append("""        </form>""")
+    REFERENCE.append("""</body></html>""")
+
+    # debloat responses from server
+    processed = []
+    toCheck = toCheck.splitlines(keepends = False)
+    processed.append(toCheck[0])
+    # skip Date
+    # skip Server
+    processed.append(toCheck[3])
+    processed.append(toCheck[4])
+    # skip transfer encoding
+    processed.append(toCheck[6])
+    # skip 3 lines
+    processed.append(toCheck[10])
+    processed.append(toCheck[11])
+
+    if toCheck[12] != """<p style="color:green">Your reply has been submitted!</p>""":
+        # print("FAIL 1")
+        # print(toCheck[12])
+        assert False
+        return False
+    elif toCheck[12] != """<p style="color:green">Your reply has been updated!</p>""":
+        # print("FAIL 1")
+        # print(toCheck[12])
+        assert False
+        return False
+
+    # debloat HTML
+    for i in range(13, len(toCheck)):
+        if toCheck[i] == "" or toCheck[i].isspace():
+            continue
+        else:
+            processed.append(toCheck[i])
+
+    if (len(processed) != len(REFERENCE)):
+        # print(processed, sep = '\n')
+        # print("========================================================")
+        # print(REFERENCE, sep = '\n')
+        # print("FAIL 2")
+        assert False
+        return False
+
+    for i in range(0, len(REFERENCE)):
+        if (processed[i] != REFERENCE[i]):
+            # print("FAIL 3")
+            # print(processed[i] + " != " + REFERENCE[i])
+            assert False
+            return False
+
+    # print("PASS")
+    return True
+
+# sample response from server
 ################################################################################
 # HTTP/1.1 200 OK
 # Date: Sat, 18 Jul 2020 21:10:34 GMT
@@ -109,6 +212,7 @@ print()
 # </body></html>
 ################################################################################
 
+# What if something went wrong
 ################################################################################
 # HTTP/1.1 400 Bad Request
 # Date: Sat, 18 Jul 2020 21:02:17 GMT
@@ -128,17 +232,11 @@ print()
 # <html><head>
 ################################################################################
 
-
 s.sendall(req)
-data = s.recv(2048)
+data = s.recv(4096)
 
 resp = data.decode("utf-8")
-
-assert (resp.find("200 OK") != -1), resp
-
 print('Received:')
-# It's in bytes, convert to text
-print(data.decode("utf-8"))
+print(resp)
 
-
-
+assert check(resp)
