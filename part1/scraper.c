@@ -102,7 +102,7 @@ bool check(char toCheck[], char* name, char* response)
     };
     
     #define skip     token = strtok(NULL, CRLF)
-    #define refcmp(i) token = strtok(NULL, CRLF); printf("%d: %s &&  %s\n", i, token, REFERENCE[i]); if (strcmp(token, REFERENCE[i]) != 0) {assert(false); return false;}
+    #define refcmp(i) token = strtok(NULL, CRLF); /*printf("%d: %s &&  %s\n", i, token, REFERENCE[i]);*/ if (strcmp(token, REFERENCE[i]) != 0) {assert(false); return false;}
 
     char* token = strtok(toCheck, CRLF);
     char* congrats;
@@ -189,7 +189,7 @@ bool check2(char toCheck[], char* name, char* response)
     assert(accpet);
     assert(decline);
 
-    // reference have 25 lines
+    // reference have 24 lines
     const char* const REFERENCE[] = 
     {
         "HTTP/1.1 200 OK\r",
@@ -227,30 +227,31 @@ bool check2(char toCheck[], char* name, char* response)
     if (strcmp(token, REFERENCE[0]) != 0) {assert(false); return false;}
     skip; // Date
     skip; // Server
+    skip; // encoding
     refcmp(1);
-    refcmp(2);
-    skip;
-    refcmp(3);
     skip;
     skip;
-    // skip;
-    refcmp(4);
-    refcmp(5);
-    
-    for (int i = 6; i <= 20; i++)
+
+    for (int i = 2; i <= 19; i++)
     {
         refcmp(i);
     }
+
     skip;
+    refcmp(20);
     refcmp(21);
     refcmp(22);
+    skip;
     refcmp(23);
 
     return true;
 }
 
-
-
+///
+/// @brief Encapsulated web socket access.
+/// @param request C-string holds the request
+/// @param server_message out parameter, a C-string holds the response from server
+/// @param server_message_length length of message to recevive
 void sendNrequest(char* request, char* server_message, int server_message_length)
 {
     int socket_desc;
@@ -386,11 +387,11 @@ int main (int argc, char **argv)
 
     server_message = calloc(2000, sizeof(char));
     sendNrequest(request, server_message, 2000);
-    printf("Server's response:\n%s", server_message);
-    // check2(server_message, name, response);
+    // printf("Server's response:\n%s", server_message);
+    check2(server_message, name, response);
     free(request);
     free(server_message);
 
-
+    printf("Success.\n");
     return 0;
 }

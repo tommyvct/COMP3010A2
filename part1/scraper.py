@@ -243,8 +243,7 @@ s.close()
 # print('Received:')
 # print(resp)
 
-if check(resp, name, response, False):
-    print("Test 1 passed")
+check(resp, name, response, False)
 
 
 
@@ -327,5 +326,5 @@ s.close()
 # print('Received:')
 # print(resp)
 
-if check(resp, name, response, True):
-    print("Test 2 passed")
+check(resp, name, response, True)
+print("Success.")
