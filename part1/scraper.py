@@ -170,7 +170,7 @@ def check(toCheck, name, response, comeback):
         if (processed[i] != REFERENCE[i]):
             # print("FAIL 3")
             # print(processed[i] + " != " + REFERENCE[i])
-            assert False
+            assert Fase
             return False
 
     # print("PASS")
