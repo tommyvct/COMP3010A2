@@ -12,7 +12,11 @@
             "type": "python",
             "request": "launch",
             "program": "${file}",
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "args": [
+                "954",
+                "yes"
+            ],
         },
         {
             "name": "clang - Build and debug active file",
@@ -20,7 +24,7 @@
             "request": "launch",
             "program": "${fileDirname}/${fileBasenameNoExtension}",
             "args": [
-                "jhfqewf",
+                "324",
                 "yes"
             ],
             "stopAtEntry": false,

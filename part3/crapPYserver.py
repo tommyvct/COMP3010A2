@@ -6,13 +6,14 @@ import socket
 import subprocess
 
 
-PORT = 8888
-WWWROOT = "/Users/tommyvct/Desktop/web_files"
+PORT = 15067
+WWWROOT = "/home/student/wus2/Desktop/web_files"
 
 # set up socket
 ss = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 ss.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-ss.bind(("127.0.0.1", PORT))
+# ss.bind(("127.0.0.1", PORT))
+ss.bind((socket.gethostname(), PORT))
 ss.listen(5)
 
 
@@ -20,42 +21,46 @@ def request(status):
     """returns a part of header if 200, or the whole body if 404, etc"""
     ret = b""
     if status == 200:
+        print("200 returned")
         ret += b"HTTP/1.1 200 OK\r\n"
-        ret += b"Server: crapserver\r\n"
+        ret += b"Server: crapPYserver\r\n"
     elif status == 404:
+        print("404 returned")
         ret += b"HTTP/1.1 404 Not Found\r\n"
-        ret += b"Server: crapserver\r\n"
+        ret += b"Server: crapPYserver\r\n"
         ret += b"Content-Type: text/html; charset=UTF-8\r\n"
         ret += b"Connection: close\r\n\r\n"
         ret += b"<html>"
         ret += b"<head><title>404 Not Found</title></head>"
         ret += b"<body>"
         ret += b"<center><h1>404 Not Found</h1></center>"
-        ret += b"<hr><center>crapserver</center>"
+        ret += b"<hr><center>crapPYserver</center>"
         ret += b"</body>"
         ret += b"</html>"
     elif status == 400:
+        print("400 returned")
         ret += b"HTTP/1.1 400 Bad Request\r\n"
-        ret += b"Server: crapserver\r\n"
+        ret += b"Server: crapPYserver\r\n"
         ret += b"Content-Type: text/html; charset=UTF-8\r\n"
         ret += b"Connection: close\r\n\r\n"
         ret += b"<html>"
         ret += b"<head><title>400 Bad Request</title></head>"
         ret += b"<body>"
         ret += b"<center><h1>400 Bad Request</h1></center>"
-        ret += b"<hr><center>crapserver</center>"
+        ret += b"<hr><center>crapPYserver</center>"
         ret += b"</body>"
         ret += b"</html>"
     elif status == 500:
+        print("500 returned")
         ret += b"HTTP/1.1 500 Internal Error\r\n"
-        ret += b"Server: crapserver\r\n"
+        ret += b"Server: crapPYserver\r\n"
         ret += b"Content-Type: text/html; charset=UTF-8\r\n"
         ret += b"Connection: close\r\n\r\n"
         ret += b"<html>"
         ret += b"<head><title>500 Internal Error</title></head>"
         ret += b"<body>"
         ret += b"<center><h1>500 Internal Error</h1></center>"
-        ret += b"<hr><center>crapserver</center>"
+        ret += b"<hr><center>crapPYserver</center>"
         ret += b"</body>"
         ret += b"</html>"
     else:
@@ -69,6 +74,7 @@ def get_static_file(filename, header_only=False):
         filename = "/index.html"
     try:
         f = open(WWWROOT + filename, "rb")
+        print("accessing file: " + WWWROOT + filename)
         ret = f.read()
         f.close()
         if header_only:
@@ -81,7 +87,8 @@ def get_static_file(filename, header_only=False):
 
 
 def run_cgi(cgi, req_type, req_content, cookie=None):
-    """CGI handler. It mapd the given request to appropriate place, and run it"""
+    """CGI handler. It maps the given request to appropriate place, and run it"""
+    print("running: " + WWWROOT + cgi)
     new_env = os.environ.copy()
     if cookie is not None:
         new_env['HTTP_COOKIE'] = cookie
@@ -111,6 +118,7 @@ def run_cgi(cgi, req_type, req_content, cookie=None):
 while True:
     """main loop"""
     (cs, address) = ss.accept()
+    print ("Incoming connection: " + str(cs.getpeername()))
     recv = cs.recv(2000).decode()
     # print("################### IN ##########################")
     # print(recv)

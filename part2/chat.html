@@ -101,8 +101,8 @@
     </head>
 
     <body onload="setup()">
-        name: <input type="text" id="name"><br>
-        message: <input type="text" id="message"><br>
+        name: <input type="text" pattern=".*[a-zA-Z].*" id="name"><br>
+        message: <input type="text" id="message" required><br>
         <button onclick="submitOnClick()">Submit</button>
         <div id="chatlog"></div>
     </body>

@@ -5,21 +5,21 @@ import sys
 import os
 
 
-# try:
-#     name = sys.argv[1]
-#     if sys.argv[2].lower() == "yes" or sys.argv[2].lower() == "no":
-#         response =  "1" if sys.argv[2] == "yes" else "0" #argv[2] == "yes" ? "1" : "0"
-#     else:
-#         print(f"Bad format\nExample usage:\n{str(os.path.basename(__file__))}  Rick yes\n{str(os.path.basename(__file__))}  Morty no")
-#         exit(1)
-# except IndexError:
-#     print(f"Bad format\nExample usage:\n{str(os.path.basename(__file__))}  Rick yes\n{str(os.path.basename(__file__))}  Morty no")
-#     exit(1)
+try:
+    name = sys.argv[1]
+    if (sys.argv[2].lower() == "yes" or sys.argv[2].lower() == "no") and any(c.isalpha() for c in name):
+        response =  "1" if sys.argv[2] == "yes" else "0" #argv[2] == "yes" ? "1" : "0"
+    else:
+        print(f"Bad format\nExample usage:\n{str(os.path.basename(__file__))}  Rick yes\n{str(os.path.basename(__file__))}  Morty no")
+        exit(1)
+except IndexError:
+    print(f"Bad format\nExample usage:\n{str(os.path.basename(__file__))}  Rick yes\n{str(os.path.basename(__file__))}  Morty no")
+    exit(1)
 
 
 
-name = "gdfsg"
-response = "1"
+# name = "gdfsg"
+# response = "1"
 
 # create an INET, STREAMing socket
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -242,8 +242,9 @@ resp = s.recv(4096).decode("utf-8")
 s.close()
 # print('Received:')
 # print(resp)
-
-check(resp, name, response, False)
+if check(resp, name, response, False):
+    print("test 1 failed.")
+    exit(2)
 
 
 
@@ -325,6 +326,7 @@ resp = s.recv(4096).decode("utf-8")
 s.close()
 # print('Received:')
 # print(resp)
-
-check(resp, name, response, True)
+if check(resp, name, response, True):
+    print("test 2 failed.")
+    exit(2)
 print("Success.")

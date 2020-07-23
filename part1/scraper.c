@@ -4,6 +4,7 @@
 #include <arpa/inet.h>
 #include <assert.h>
 #include <stdbool.h>
+#include <ctype.h>
 
 #include <netdb.h> // For getaddrinfo
 #include <unistd.h> // for close
@@ -16,7 +17,7 @@
 /// @param name name of user
 /// @param response response from user, either `"1"` for "yes", `"0"` for "no"
 /// @return `true` if check passed, `false` if failed.
-///         If `NDEBUG` is not defined(i.e. assersion is on), and a check failed, the function will `assert(false)` instead.
+///         If `NDEBUG` is not defined(i.e. assersion is on), and a check failed, the function will be asserted instead.
 bool check(char toCheck[], char* name, char* response)
 {
     assert(toCheck);
@@ -46,8 +47,6 @@ bool check(char toCheck[], char* name, char* response)
     char* accpet;
     char* decline;
 
-    // assert(false) is used intentionally to save typing.
-    // the failing condition is already describe in the if condition
     if (strcmp(response, "0") == 0)
     {
         accpet = "        <input type=\"radio\" name=\"accept\" value=\"1\" required > Accept";
@@ -60,7 +59,8 @@ bool check(char toCheck[], char* name, char* response)
     }
     else
     {
-        assert(false);
+        assert(strcmp(response, "0") == 0);
+        assert(strcmp(response, "1") == 0);
         return false;
     }
 
@@ -102,11 +102,11 @@ bool check(char toCheck[], char* name, char* response)
     };
     
     #define skip     token = strtok(NULL, CRLF)
-    #define refcmp(i) token = strtok(NULL, CRLF); /*printf("%d: %s &&  %s\n", i, token, REFERENCE[i]);*/ if (strcmp(token, REFERENCE[i]) != 0) {assert(false); return false;}
+    #define refcmp(i) token = strtok(NULL, CRLF); /*printf("%d: %s &&  %s\n", i, token, REFERENCE[i]);*/ if (strcmp(token, REFERENCE[i]) != 0) {assert(strcmp(token, REFERENCE[i]) != 0); return false;}
 
     char* token = strtok(toCheck, CRLF);
     char* congrats;
-    if (strcmp(token, REFERENCE[0]) != 0) {assert(false); return false;}
+    if (strcmp(token, REFERENCE[0]) != 0) {assert(strcmp(token, REFERENCE[0]) != 0); return false;}
     skip; // Date
     skip; // Server
     refcmp(1);
@@ -124,7 +124,8 @@ bool check(char toCheck[], char* name, char* response)
         strcmp(token, "<p style=\"color:green\">Your reply has been updated!</p>") != 0)
     {
         //printf("congrat: %s \n", token);
-        assert(false);
+        assert(strcmp(token, "<p style=\"color:green\">Your reply has been submitted!</p>") != 0 && 
+                strcmp(token, "<p style=\"color:green\">Your reply has been updated!</p>") != 0);
         return false;
     }
 
@@ -149,7 +150,7 @@ bool check(char toCheck[], char* name, char* response)
 /// @param name name of user
 /// @param response response from user, either `"1"` for "yes", `"0"` for "no"
 /// @return `true` if check passed, `false` if failed.
-///         If `NDEBUG` is not defined(i.e. assersion is on), and a check failed, the function will `assert(false)` instead.
+///         If `NDEBUG` is not defined(i.e. assersion is on), and a check failed, the function will asserted instead.
 bool check2(char toCheck[], char* name, char* response)
 {
     assert(toCheck);
@@ -168,8 +169,6 @@ bool check2(char toCheck[], char* name, char* response)
     char* accpet;
     char* decline;
 
-    // assert(false) is used intentionally to save typing.
-    // the failing condition is already describe in the if condition
     if (strcmp(response, "0") == 0)
     {
         accpet = "        <input type=\"radio\" name=\"accept\" value=\"1\" required > Accept";
@@ -182,7 +181,8 @@ bool check2(char toCheck[], char* name, char* response)
     }
     else
     {
-        assert(false);
+        assert(strcmp(response, "0") == 0);
+        assert(strcmp(response, "1") == 0);
         return false;
     }
 
@@ -224,7 +224,7 @@ bool check2(char toCheck[], char* name, char* response)
     
     char* token = strtok(toCheck, CRLF);
     char* congrats;
-    if (strcmp(token, REFERENCE[0]) != 0) {assert(false); return false;}
+    if (strcmp(token, REFERENCE[0]) != 0) {assert(strcmp(token, REFERENCE[0]) != 0); return false;}
     skip; // Date
     skip; // Server
     skip; // encoding
@@ -322,9 +322,24 @@ void sendNrequest(char* request, char* server_message, int server_message_length
     close(socket_desc);
 }
 
+
+bool containsAlpha(const char s[])
+{
+    unsigned char c;
+
+    for (int i = 0; i < strlen(s); i++)
+    {
+        if (isalpha(s[i]))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 int main (int argc, char **argv)
 {
-    if (argc != 3 && (strcmp(argv[2], "yes") != 0 || strcmp(argv[2], "no") != 0))
+    if (argc != 3 || (strcmp(argv[2], "yes") != 0 && strcmp(argv[2], "no") != 0) || !containsAlpha(argv[1]))
     {
         printf("Bad format\nExample usage:\n%s Rick yes\n%s Morty no\n", argv[0], argv[0]);
         return 1;
@@ -363,7 +378,13 @@ int main (int argc, char **argv)
     char* server_message = calloc(2000, sizeof(char));
     sendNrequest(request, server_message, 2000);
     // printf("Server's response:\n%s", server_message);
-    check(server_message, name, response);
+    if (!check(server_message, name, response))
+    {
+        printf("%s\n", "Test 1 failed.");
+        free(request);
+        free(server_message);
+        return(2);
+    }
 
     free(request);
     free(server_message);
@@ -388,7 +409,14 @@ int main (int argc, char **argv)
     server_message = calloc(2000, sizeof(char));
     sendNrequest(request, server_message, 2000);
     // printf("Server's response:\n%s", server_message);
-    check2(server_message, name, response);
+    if (!check2(server_message, name, response))
+    {
+        printf("%s\n", "Test 2 failed.");
+        free(request);
+        free(server_message);
+        return(2);
+    }
+
     free(request);
     free(server_message);
 
