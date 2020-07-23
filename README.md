@@ -85,3 +85,5 @@ It is capable to serve all the files provided in `web_files` folder. But it won'
     But it works on my computer, using `python3` on macOS Catalina. Only minor modification is neede on the CGI script (change `/~wus2/cgi-bin/a.cgi` to just `/a.cgi`).
 
 2. Extreme lag when if multiple (2+) client exitst, due to single threading.
+
+3. Python 3 incompatibility. `str()` function demands another param for encoding, while python 2 don't 

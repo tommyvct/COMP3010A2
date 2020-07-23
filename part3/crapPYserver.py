@@ -7,7 +7,7 @@ import subprocess
 
 
 PORT = 15067
-WWWROOT = "/home/student/wus2/Desktop/web_files"
+WWWROOT = "/Users/tommyvct/Desktop/web_files"
 
 # set up socket
 ss = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -15,6 +15,7 @@ ss.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 # ss.bind(("127.0.0.1", PORT))
 ss.bind((socket.gethostname(), PORT))
 ss.listen(5)
+print("Visit: http://" + socket.gethostname() + ":" + str(PORT))
 
 
 def request(status):
@@ -118,7 +119,7 @@ def run_cgi(cgi, req_type, req_content, cookie=None):
 while True:
     """main loop"""
     (cs, address) = ss.accept()
-    print ("Incoming connection: " + str(cs.getpeername()))
+    print("Incoming connection: " + str(cs.getpeername()))
     recv = cs.recv(2000).decode()
     # print("################### IN ##########################")
     # print(recv)

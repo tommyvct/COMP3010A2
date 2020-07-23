@@ -13,10 +13,6 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "args": [
-                "954",
-                "yes"
-            ],
         },
         {
             "name": "clang - Build and debug active file",
